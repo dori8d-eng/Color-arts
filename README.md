@@ -19,7 +19,7 @@ Juego de colorear en el navegador. Arma el paisaje como rompecabezas y vuelve a 
 - **Animación**: dibuja fotogramas y reprodúcelos.
 - **Amigable**: dos jugadores en el mismo dispositivo.
 
-Hay 24 paisajes y dibujos y 20 mapas para dos jugadores. Los colores se descubren mezclando (hasta 150).
+Hay 38 paisajes y dibujos (14 gratis y 24 en la Tienda) y 24 mapas para dos jugadores. Los colores se descubren mezclando (hasta 150).
 
 ## Jugar
 

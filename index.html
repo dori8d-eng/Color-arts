@@ -18,6 +18,7 @@
 html,body{min-height:100%}
 .coins{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font:400 20px var(--font-d);color:var(--fg)}
 .coins i{font-style:normal;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#FFD23F;border:2.5px solid #0B0C10;color:#0B0C10;font:700 14px var(--font-b)}
+.coins b{font:700 20px var(--font-b);font-variant-numeric:tabular-nums}
 .coins.bump{animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .chip.foco{display:inline-flex;align-items:center;gap:6px}
@@ -851,6 +852,152 @@ const LEVELS=[
   ['Cuarto de luz',rect(220,90,40,30),'#FFD23F'],['Techo',poly([212,90,268,90,240,62]),'#E63B2E'],
   ['Puerta',rect(232,274,16,28),'#5A3F2E'],
  ]},
+ {name:'Parque',make:()=>[
+  ['Cielo',rect(0,0,W,H),'#BDE6FF'],['Sol',circle(60,60,30),'#FFD23F'],['Nube',cloud(300,60),'#FFFFFF'],
+  ['Pasto',svg('M0 250 C160 236 320 262 480 246 L480 360 L0 360 Z'),'#7BC86C'],
+  ['Arenero',ell(380,318,84,26),'#F2D49B'],
+  ['Postes del columpio',svg('M60 272 L100 140 L108 140 L70 272 Z M200 272 L160 140 L152 140 L190 272 Z'),'#E63B2E'],
+  ['Barra del columpio',rect(96,132,68,10),'#C8452F'],
+  ['Cadenas',svg('M112 142 H116 V226 H112 Z M144 142 H148 V226 H144 Z'),'#55585F'],
+  ['Asiento',rect(104,224,52,10),'#2C6BED'],
+  ['Escalera',svg('M268 300 L284 170 L292 170 L276 300 Z M300 300 L316 170 L324 170 L308 300 Z M281 200 H318 V206 H280 Z M277 236 H314 V242 H276 Z M273 270 H310 V276 H272 Z'),'#8E44C9'],
+  ['Resbaladilla',svg('M316 170 L330 170 C360 220 400 270 452 288 L446 302 C392 284 350 232 316 178 Z'),'#FFD23F'],
+  ['Flores',circles([[30,320,7],[60,336,7],[220,330,7]]),'#FF6FA5'],
+ ]},
+ {name:'Hamburguesa',make:()=>[
+  ['Fondo',rect(0,0,W,H),'#FFE9C7'],['Plato',ell(240,300,176,26),'#FFFFFF'],
+  ['Pan de abajo',svg('M110 262 H370 Q370 296 340 296 H140 Q110 296 110 262 Z'),'#E0A85A'],
+  ['Carne',svg('M104 228 H376 Q392 246 376 264 H104 Q88 246 104 228 Z'),'#7A4B2A'],
+  ['Queso',poly([100,224,380,224,362,244,330,232,300,250,270,232,240,250,210,232,180,250,150,232,118,244]),'#FFC93C'],
+  ['Jitomate',rect(118,196,244,14),'#E63B2E'],
+  ['Lechuga',svg('M96 222 Q110 204 126 220 Q142 204 158 220 Q174 204 190 220 Q206 204 222 220 Q238 204 254 220 Q270 204 286 220 Q302 204 318 220 Q334 204 350 220 Q366 204 384 222 L384 228 L96 228 Z'),'#3BB54A'],
+  ['Pan de arriba',svg('M106 202 Q110 108 240 102 Q370 108 374 202 Z'),'#E8A84E'],
+  ['Ajonjolí',(()=>{const p2=new Path2D();[[190,140],[232,126],[272,140],[212,166],[256,166],[302,160],[168,172]].forEach(([x,y])=>{p2.moveTo(x+6,y);p2.ellipse(x,y,6,3,0,0,TAU)});return p2})(),'#FFF3E0'],
+ ]},
+ {name:'Sandía',make:()=>[
+  ['Fondo',rect(0,0,W,H),'#D7F5E3'],
+  ['Mantel',rect(0,272,W,88),'#E63B2E'],
+  ['Cuadros del mantel',(()=>{const p2=new Path2D();for(let y=272,r=0;y<H;y+=30,r++)for(let x=r%2*30;x<W;x+=60)p2.rect(x,y,30,30);return p2})(),'#FFFFFF'],
+  ['Cáscara',semi(240,124,160),'#2E8B4A'],['Parte blanca',semi(240,124,146),'#E9F7C9'],['Pulpa',semi(240,124,132),'#FF5E6C'],
+  ['Semillas',(()=>{const p2=new Path2D();[[180,170],[240,190],[300,170],[210,226],[270,226],[150,148],[330,148],[240,150]].forEach(([x,y])=>{p2.moveTo(x+4,y);p2.ellipse(x,y,4,7,0,0,TAU)});return p2})(),'#1A1B20'],
+ ]},
+ {name:'Caracol',make:()=>[
+  ['Fondo',rect(0,0,W,H),'#E3F4D9'],['Sol',circle(70,60,28),'#FFD23F'],
+  ['Pasto',svg('M0 290 C160 276 320 302 480 288 L480 360 L0 360 Z'),'#6CC04A'],
+  ['Antenas',svg('M404 172 L396 130 L401 129 L409 171 Z M420 170 L428 128 L433 130 L425 172 Z'),'#3A2E22'],
+  ['Puntas de las antenas',circles([[398,128,6],[431,128,6]]),'#FF8A1F'],
+  ['Cuerpo',svg('M90 290 C90 262 120 250 160 250 L360 250 C380 250 392 230 392 200 C392 170 420 160 432 180 C444 200 436 250 420 270 C400 292 380 296 340 296 L100 296 Z'),'#9BD93A'],
+  ['Concha',circle(230,196,80),'#E0A85A'],['Anillo de la concha',circle(230,196,54),'#C07A3A'],['Centro de la concha',circle(230,196,26),'#F2C27A'],
+  ['Ojo',circle(420,186,5),'#1A1B20'],['Cachete',circle(428,208,6),'#FF9EBB'],
+  ['Flores',circles([[40,330,8],[460,330,8],[120,340,6]]),'#FF6FA5'],
+ ]},
+ {name:'Granja',own:'esc-granja',make:()=>[
+  ['Cielo',rect(0,0,W,H),'#AEE0F7'],['Sol',circle(70,60,30),'#FFC93C'],['Nube',cloud(320,50),'#FFFFFF'],
+  ['Colinas',svg('M0 220 C120 170 260 190 480 210 L480 360 L0 360 Z'),'#8BCF5E'],
+  ['Silo',rect(330,120,56,150),'#C9CED8'],['Techo del silo',svg('M330 122 Q358 84 386 122 Z'),'#8E44C9'],
+  ['Granero',poly([150,270,150,170,220,120,290,170,290,270]),'#C8452F'],
+  ['Borde del techo',poly([140,174,220,112,300,174,290,180,220,128,150,180]),'#FFFFFF'],
+  ['Puerta del granero',rect(190,206,60,64),'#F7F2E4'],
+  ['Cruz de la puerta',svg('M190 206 L196 206 L250 264 L250 270 L244 270 L190 212 Z M250 206 L250 212 L196 270 L190 270 L190 264 L244 206 Z'),'#7A4B2A'],
+  ['Ventana del granero',circle(220,162,12),'#FFD23F'],
+  ['Pradera',svg('M0 268 C160 256 320 280 480 262 L480 360 L0 360 Z'),'#5DB043'],
+  ['Cerca',(()=>{const p2=new Path2D();for(let x=12;x<W;x+=44)p2.rect(x,280,8,44);p2.rect(0,290,W,6);p2.rect(0,308,W,6);return p2})(),'#FFFFFF'],
+  ['Flores',circles([[60,342,6],[300,346,6],[420,340,6]]),'#FF6FA5'],
+ ]},
+ {name:'Selva',own:'esc-selva',make:()=>[
+  ['Cielo',rect(0,0,W,H),'#CDEFD2'],
+  ['Árboles del fondo',circles([[40,120,70],[160,90,80],[300,110,80],[440,100,80]]),'#4E9E5B'],
+  ['Troncos',(()=>{const p2=new Path2D();p2.rect(60,140,26,220);p2.rect(390,150,28,210);return p2})(),'#7A4B2A'],
+  ['Lianas',svg('M120 0 C110 60 140 120 126 200 L132 200 C146 120 116 60 126 0 Z M330 0 C340 80 310 140 324 220 L330 220 C316 140 346 80 336 0 Z'),'#3B8A4A'],
+  ['Suelo',svg('M0 300 C160 290 320 310 480 296 L480 360 L0 360 Z'),'#6B4A2E'],
+  ['Hojas grandes',join(rot(40,322,60,22,-.5),rot(150,332,60,20,.3),rot(330,332,60,20,-.3),rot(440,322,60,22,.5)),'#2E8B4A'],
+  ['Rama',rect(180,232,140,10),'#7A4B2A'],
+  ['Loro',ell(250,190,26,42),'#E63B2E'],['Ala del loro',rot(258,198,12,28,.3),'#2C6BED'],
+  ['Pico del loro',poly([228,168,212,178,228,186]),'#FFD23F'],['Ojo del loro',circle(242,170,4),'#1A1B20'],
+ ]},
+ {name:'Fondo del mar',own:'esc-mar',make:()=>[
+  ['Agua',rect(0,0,W,H),'#1F6FB2'],['Rayos de luz',svg('M100 0 L160 0 L120 220 Z M260 0 L330 0 L300 240 Z'),'#3E8FCC'],
+  ['Arena',svg('M0 290 C160 270 320 300 480 280 L480 360 L0 360 Z'),'#F2D49B'],
+  ['Corales',svg('M60 300 L60 240 C60 228 74 228 74 240 L74 262 L84 262 L84 214 C84 200 100 200 100 214 L100 300 Z M410 296 L410 230 C410 218 424 218 424 230 L424 250 L436 250 L436 220 C436 208 450 208 450 220 L450 296 Z'),'#FF7E79'],
+  ['Cofre',rect(220,262,80,46),'#9C6B3E'],['Tapa del cofre',svg('M216 264 Q260 226 304 264 Z'),'#7A4B2A'],['Cerradura',rect(254,270,12,14),'#FFD23F'],
+  ['Estrella de mar',(()=>{const p2=new Path2D();for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5,r=k%2?10:24,x=150+Math.cos(a)*r,y=318+Math.sin(a)*r;k?p2.lineTo(x,y):p2.moveTo(x,y)}p2.closePath();return p2})(),'#FF8A1F'],
+  ['Medusa',svg('M330 120 Q360 70 390 120 Z'),'#D9A6F2'],
+  ['Tentáculos de la medusa',svg('M338 120 h6 v40 h-6 Z M356 120 h6 v48 h-6 Z M374 120 h6 v40 h-6 Z'),'#C27FE0'],
+  ['Burbujas',circles([[80,80,8],[96,52,5],[200,120,6]]),'#BFE7FF'],
+ ]},
+ {name:'Otoño',own:'esc-otono',make:()=>[
+  ['Cielo',rect(0,0,W,H),'#FFE0B8'],['Sol',circle(400,70,32),'#FF9F3F'],
+  ['Colinas',svg('M0 240 C120 200 260 220 480 230 L480 360 L0 360 Z'),'#C9A35A'],
+  ['Tronco',svg('M220 300 L230 170 L210 130 L222 126 L240 160 L258 120 L270 126 L250 170 L260 300 Z'),'#6B4226'],
+  ['Copa',circles([[240,120,64],[190,140,44],[290,140,44],[214,90,40],[266,88,40]]),'#E8742A'],
+  ['Hojas rojas',circles([[200,110,14],[280,120,14],[240,80,12],[256,150,12]]),'#C8452F'],
+  ['Pasto',svg('M0 296 C160 284 320 306 480 292 L480 360 L0 360 Z'),'#A7B04A'],
+  ['Hojas caídas',join(rot(120,320,10,5,.4),rot(330,334,10,5,-.6),rot(300,316,10,5,.2),rot(60,336,10,5,-.3)),'#E8742A'],
+  ['Calabaza',ell(400,318,30,22),'#FF8A1F'],['Tallo de la calabaza',rect(397,288,6,10),'#3B8A4A'],
+ ]},
+ {name:'Cascada',own:'esc-cascada',make:()=>[
+  ['Cielo',rect(0,0,W,H),'#BDE6FF'],
+  ['Montaña',poly([0,260,0,80,120,40,200,90,280,60,380,100,480,70,480,260]),'#8A8F9C'],
+  ['Arcoíris',band(340,150,50,38),'#FF6FA5'],
+  ['Cascada',svg('M200 90 C210 160 196 220 206 280 L266 280 C256 220 270 160 270 70 Z'),'#7CCBF5'],
+  ['Lago',ell(240,300,200,40),'#3E9BD6'],['Espuma',ell(236,282,52,12),'#FFFFFF'],
+  ['Rocas',circles([[60,290,28],[420,286,30],[120,320,18]]),'#6E6A72'],
+  ['Pasto',svg('M0 330 C160 316 320 340 480 324 L480 360 L0 360 Z'),'#5DB043'],
+  ...pine(30,250),...pine(456,250,.9),
+ ]},
+ {name:'Búho',own:'dib-buho',make:()=>[
+  ['Cielo',rect(0,0,W,H),'#1E2A55'],['Luna',circle(400,70,36),'#FFE27A'],
+  ['Estrellas',circles([[60,50,3],[150,30,2.5],[300,40,3],[90,120,2]]),'#FFF3B0'],
+  ['Rama',svg('M0 290 C160 280 320 300 480 286 L480 304 C320 318 160 298 0 308 Z'),'#6B4226'],
+  ['Orejas',svg('M170 120 L180 70 L214 104 Z M310 120 L300 70 L266 104 Z'),'#8B5A2B'],
+  ['Cuerpo',ell(240,200,90,100),'#A9764A'],['Panza',ell(240,236,56,58),'#F2D7B0'],
+  ['Alas',join(rot(156,214,22,56,.15),rot(324,214,22,56,-.15)),'#8B5A2B'],
+  ['Ojos',circles([[204,160,30],[276,160,30]]),'#FFFFFF'],['Pupilas',circles([[206,162,13],[274,162,13]]),'#1A1B20'],
+  ['Pico',poly([230,184,250,184,240,204]),'#FF8A1F'],
+  ['Patas',svg('M210 292 h10 v12 h-10 Z M260 292 h10 v12 h-10 Z'),'#FF8A1F'],
+ ]},
+ {name:'Unicornio',own:'dib-unicornio',make:()=>[
+  ['Fondo',rect(0,0,W,H),'#FFE3F4'],['Nubes',join(cloud(30,300,1.3),cloud(360,300,1.3)),'#FFFFFF'],
+  ['Estrellitas',circles([[100,80,6],[400,70,6],[420,150,5]]),'#FFD23F'],
+  ['Cuello',svg('M190 360 L210 230 L300 220 L320 360 Z'),'#FAF7FF'],
+  ['Cabeza',svg('M200 240 C170 200 190 130 250 120 C300 112 340 150 360 200 C372 230 350 250 320 244 C300 240 280 236 260 250 Z'),'#FAF7FF'],
+  ['Crin',svg('M200 140 C170 160 160 220 180 270 C150 240 140 180 170 140 C180 120 200 110 220 116 Z'),'#B98CF2'],
+  ['Oreja',poly([258,120,272,84,284,124]),'#FAF7FF'],
+  ['Cuerno',poly([224,126,240,40,254,122]),'#FFD23F'],
+  ['Ojo',ell(292,170,8,10),'#1A1B20'],['Cachete',circle(322,206,10),'#FF9EBB'],
+ ]},
+ {name:'Avión',own:'dib-avion',make:()=>[
+  ['Cielo',rect(0,0,W,H),'#A9DDF2'],['Nubes',join(cloud(40,80),cloud(330,290,1.2),cloud(390,60,.7)),'#FFFFFF'],
+  ['Ala de atrás',poly([250,170,300,100,330,100,300,170]),'#2C6BED'],
+  ['Cola',poly([96,190,70,120,110,120,140,170]),'#E63B2E'],
+  ['Cuerpo del avión',svg('M80 200 C80 170 120 160 160 160 L380 160 C420 160 440 180 440 200 C440 220 420 236 380 236 L160 236 C120 236 80 226 80 200 Z'),'#F2F2F2'],
+  ['Franja',rect(150,214,250,8),'#E63B2E'],
+  ['Ventanas',circles([180,214,248,282,316,350].map(x=>[x,192,8])),'#7CCBF5'],
+  ['Ala de enfrente',poly([230,210,290,300,330,300,300,210]),'#2C6BED'],
+  ['Hélice',ell(446,200,6,34),'#55585F'],
+ ]},
+ {name:'Pingüino',own:'dib-pinguino',make:()=>[
+  ['Cielo',rect(0,0,W,H),'#CFE6F7'],['Hielo',svg('M0 280 C160 266 320 290 480 276 L480 360 L0 360 Z'),'#F7FAFD'],
+  ['Iceberg',poly([340,280,370,180,420,160,460,280]),'#DCEBF7'],
+  ['Cuerpo',ell(220,190,86,110),'#22252E'],['Panza',ell(220,226,58,74),'#FFFFFF'],
+  ['Bufanda',rect(150,172,140,14),'#E63B2E'],
+  ['Aletas',join(rot(132,200,18,52,.35),rot(308,200,18,52,-.35)),'#22252E'],
+  ['Ojos',circles([[198,128,9],[242,128,9]]),'#FFFFFF'],['Pupilas',circles([[200,130,4],[240,130,4]]),'#1A1B20'],
+  ['Pico',poly([206,146,234,146,220,164]),'#FF8A1F'],
+  ['Patas',join(ell(190,300,22,8),ell(250,300,22,8)),'#FF8A1F'],
+  ['Copos',circles([[40,40,4],[120,90,3],[400,50,4],[300,110,3]]),'#FFFFFF'],
+ ]},
+ {name:'Submarino',own:'dib-submarino',make:()=>[
+  ['Agua',rect(0,0,W,H),'#2A86C9'],['Arena',svg('M0 316 C160 300 320 330 480 312 L480 360 L0 360 Z'),'#F2D49B'],
+  ['Algas',svg('M40 360 C24 320 60 296 44 256 C72 286 54 322 64 360 Z M450 360 C440 330 466 300 452 270 C478 300 466 330 472 360 Z'),'#3BA55C'],
+  ['Periscopio',svg('M250 112 V60 H290 V72 H262 V112 Z'),'#55585F'],
+  ['Torre',rect(210,110,60,50),'#FFC93C'],
+  ['Hélice',svg('M74 200 L40 170 L52 200 L40 230 Z'),'#E63B2E'],
+  ['Cuerpo del submarino',ell(240,200,170,60),'#FFD23F'],
+  ['Ventanas',circles([[160,196,16],[220,196,16],[280,196,16]]),'#7CCBF5'],
+  ['Pez',join(ell(400,276,24,12),poly([420,276,442,262,442,290])),'#FF8A1F'],
+  ['Burbujas',circles([[380,120,10],[400,90,7],[416,64,5]]),'#BFE7FF'],
+ ]},
 ];
 
 /* ---------- colores ---------- */
@@ -1099,6 +1246,7 @@ function setPhase(p){
   if(p==='whiten'){say('¡Prepárate para pintar!');SFX.whoosh()}
   if(p==='paint'){
     $('finish').hidden=$('finishNoAI').hidden=awarded||gameMode==='pixel';
+    $('saveBtn').hidden=awarded||gameMode==='friends';
     $('animPanel').hidden=gameMode!=='anim';if(gameMode==='anim')renderFrames();
     if(gameMode==='pixel'){say('Elige un número y pinta sus cuadritos. Al completar todos, terminas.');$('pxPanel').hidden=false;renderPx()}
     else{if(gameMode==='friends'){resetFriends();renderDuo()}
@@ -1318,7 +1466,7 @@ $('rotL').onclick=()=>{ruler.ang-=15;SFX.tick()};
 $('rotR').onclick=()=>{ruler.ang+=15;SFX.tick()};
 function removeRuler(){ruler.on=false;rulerDrag=null;setTool(tool==='ruler'?'brush':tool);SFX.unpick();say('Quitaste la regla.')}
 $('rulerOff').onclick=removeRuler;
-const TOOLMSG={ruler:'Arrastra la regla para moverla. Para quitarla toca «Quitar regla», toca «Regla» otra vez o tócala dos veces.',rainbow:'Pincel arcoíris: cambia de color solo mientras pintas.',sparkle:'Brillantina: pinta con el color elegido y deja destellos.',stamp:'Sello: toca el dibujo para poner estrellas del color elegido.',brush:'Pincel listo. Pasa el dedo para pintar.',marker:'Plumón listo. Pinta encima y el color se oscurece un poco.',fill:'Cubeta lista. Toca una parte del dibujo para rellenarla.',eraser:'Borrador listo. Pasa el dedo para borrar.',ruler:'Arrastra la regla para moverla. La pintura no pasa por encima de ella.'};
+const TOOLMSG={rainbow:'Pincel arcoíris: cambia de color solo mientras pintas.',sparkle:'Brillantina: pinta con el color elegido y deja destellos.',stamp:'Sello: toca el dibujo para poner estrellas del color elegido.',brush:'Pincel listo. Pasa el dedo para pintar.',marker:'Plumón listo. Pinta encima y el color se oscurece un poco.',fill:'Cubeta lista. Toca una parte del dibujo para rellenarla.',eraser:'Borrador listo. Pasa el dedo para borrar.',ruler:'Arrastra la regla para moverla. La pintura no pasa por encima. Para quitarla toca «Quitar regla», «Regla» otra vez o tócala dos veces.'};
 $('toolSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   // Tocar «Regla» otra vez la quita
   if(b.dataset.tool==='ruler'&&tool==='ruler'&&ruler.on){removeRuler();return}
@@ -1717,7 +1865,7 @@ function showGrade(g,headline,note,fixedPay){
   el.innerHTML=`<span class="num">${hide||fx?(pay?'+'+pay:'0'):g+'<small>/10</small>'}</span><p><b></b><br><span class="gnote"></span><br>${pay?`Ganaste ${pay} ${pay===1?'moneda':'monedas'}`:'No ganaste monedas'}${m>1&&!hide?` (${base} × ${m} por ${multLabel()})`:''}.</p><div class="gbtns"><button class="chip go" id="again2">Nueva partida</button><button class="chip savebtn" id="save2">Guardar</button></div>`;
   el.querySelector('b').textContent=headline;el.querySelector('.gnote').textContent=note||'';
   $('again2').onclick=()=>{SFX.tick();newRound()};
-  $('save2').onclick=()=>$('saveBtn').onclick();$('saveBtn').hidden=true;
+  $('save2').onclick=()=>$('saveBtn').onclick();$('saveBtn').hidden=true;$('finish').hidden=$('finishNoAI').hidden=true;
   el.hidden=false;say('¡Cuadro terminado!');SFX.done();setCoins(coins+pay);
 }
 // Cuánto del dibujo ya está pintado (0 a 1), sin contar las líneas
@@ -1894,6 +2042,7 @@ const FR_SCENES=[
 const MIRROR=new DOMMatrix([-1,0,0,1,480,0]);
 function both(p){const q=new Path2D();q.addPath(p);q.addPath(p,MIRROR);return q}
 function join(...ps){const q=new Path2D();ps.forEach(x=>q.addPath(x));return q}
+function semi(cx,cy,r){const p=new Path2D();p.moveTo(cx+r,cy);p.arc(cx,cy,r,0,Math.PI);p.closePath();return p}
 function rot(x,y,a,b,r){const p=new Path2D();p.moveTo(x+a*Math.cos(r),y+a*Math.sin(r));p.ellipse(x,y,a,b,r,0,TAU);return p}
 const BARS={wave:'M240 0 C200 60 280 120 240 180 C200 240 280 300 240 360',zig:'M240 0 L216 45 L264 90 L216 135 L264 180 L216 225 L264 270 L216 315 L240 360',
   curve:'M240 0 C270 90 210 180 240 270 C255 315 240 340 240 360',small:'M240 0 C220 40 260 80 240 120 C220 160 260 200 240 240 C220 280 260 320 240 360',
@@ -1947,6 +2096,22 @@ FR_SCENES.push(
   ['Copos',circles([[40,40,4],[200,60,3],[280,60,3],[440,40,4],[90,110,3],[390,110,3]]),'#FFFFFF'],
   ['Cuerpos',both(circles([[120,282,46],[120,200,34]])),'#FFFFFF'],['Bufandas',both(rect(96,226,48,10)),'#E63B2E'],
   ['Sombreros',both(svg('M96 172 H144 V162 H134 V128 H106 V162 H96 Z')),'#1A1B20'],['Narices',both(poly([120,198,142,202,120,206])),'#FF8A1F']]},
+ {name:'Dos pingüinos',own:'fr-pinguinos',bar:BARS.straight,make:()=>[['Cielo',rect(0,0,W,H),'#CFE6F7'],['Hielo',svg('M0 290 C160 276 320 300 480 286 L480 360 L0 360 Z'),'#F7FAFD'],
+  ['Cuerpos',both(ell(120,200,60,84)),'#22252E'],['Panzas',both(ell(120,222,40,58)),'#FFFFFF'],['Ojos',both(circles([[104,148,7],[136,148,7]])),'#FFFFFF'],
+  ['Picos',both(poly([110,162,130,162,120,176])),'#FF8A1F'],['Patas',both(join(ell(100,286,16,6),ell(140,286,16,6))),'#FF8A1F']]},
+ {name:'Dos sandías',own:'fr-sandias',bar:BARS.wave,make:()=>[['Fondo',rect(0,0,W,H),'#D7F5E3'],['Mantel',rect(0,270,W,90),'#E63B2E'],
+  ['Cáscaras',both(semi(120,150,100)),'#2E8B4A'],['Partes blancas',both(semi(120,150,90)),'#E9F7C9'],['Pulpas',both(semi(120,150,80)),'#FF5E6C'],
+  ['Semillas',both((()=>{const p2=new Path2D();[[90,180],[120,200],[150,180],[105,214],[135,214],[120,170]].forEach(([x,y])=>{p2.moveTo(x+3,y);p2.ellipse(x,y,3,6,0,0,TAU)});return p2})()),'#1A1B20']]},
+ {name:'Dos búhos',own:'fr-buhos',bar:BARS.curve,make:()=>[['Cielo',rect(0,0,W,H),'#1E2A55'],['Estrellas',circles([[40,40,3],[200,40,3],[280,40,3],[440,40,3]]),'#FFF3B0'],
+  ['Rama',svg('M0 290 C160 280 320 300 480 286 L480 304 C320 318 160 298 0 308 Z'),'#6B4226'],
+  ['Orejas',both(svg('M76 140 L82 100 L104 126 Z M164 140 L158 100 L136 126 Z')),'#8B5A2B'],
+  ['Cuerpos',both(ell(120,206,60,82)),'#A9764A'],['Panzas',both(ell(120,232,36,44)),'#F2D7B0'],
+  ['Ojos',both(circles([[98,172,18],[142,172,18]])),'#FFFFFF'],['Pupilas',both(circles([[100,174,8],[140,174,8]])),'#1A1B20'],
+  ['Picos',both(poly([112,192,128,192,120,206])),'#FF8A1F']]},
+ {name:'Dos caracoles',own:'fr-caracoles',bar:BARS.steps,make:()=>[['Fondo',rect(0,0,W,H),'#E3F4D9'],GROUND('#6CC04A'),
+  ['Cuerpos',both(svg('M30 290 C30 270 50 262 80 262 L170 262 C184 262 190 246 190 226 C190 206 206 200 214 214 C222 228 218 262 204 278 C194 290 180 296 160 296 L40 296 Z')),'#9BD93A'],
+  ['Conchas',both(circle(100,220,52)),'#E0A85A'],['Centros de las conchas',both(circle(100,220,22)),'#C07A3A'],
+  ['Ojos',both(circle(204,214,4)),'#1A1B20']]},
 );
 let frScene=-1,frLeft=null,frRight=null,frBar=null,fillClip=null;
 function startFriends(){
@@ -2067,7 +2232,7 @@ function snapshot(){
   else{g.drawImage(paintCv,0,0,W,H);if(CFG.lines!=='erase'&&regions.length)g.drawImage(lineCv,0,0,W,H)}
   return c.toDataURL('image/jpeg',.85);
 }
-const MODE_NAME={puzzle:'Rompecabezas',creative:'Creativo',pixel:'Pixel',nocolor:'Sin color',anim:'Animación'};
+const MODE_NAME={puzzle:'Rompecabezas',creative:'Creativo',pixel:'Pixel',nocolor:'Sin color',anim:'Animación',friends:'Amigable'};
 $('saveBtn').onclick=()=>{
   if(phase!=='paint'){warn('Todavía no','Primero arma el rompecabezas para poder guardar tu dibujo.');return}
   $('saveAskTxt').textContent=gameMode==='anim'?`Tu animación de ${anim.frames.length} ${anim.frames.length===1?'fotograma':'fotogramas'} se guardará en la Biblioteca.`:'Tu dibujo se guardará en la Biblioteca.';
@@ -2077,7 +2242,7 @@ $('saveNo').onclick=()=>{$('saveBox').hidden=true;SFX.unpick()};
 $('saveYes').onclick=()=>{$('saveBox').hidden=true;doSave()};
 async function doSave(){
   let item;
-  const base={id:Date.now()+'-'+(Math.random()*1e6|0),date:Date.now(),mode:gameMode,scene:gameMode==='creative'||gameMode==='anim'?'':LEVELS[level].name};
+  const base={id:Date.now()+'-'+(Math.random()*1e6|0),date:Date.now(),mode:gameMode,scene:gameMode==='creative'||gameMode==='anim'?'':gameMode==='friends'?(FR_SCENES[frScene]||{}).name||'':LEVELS[level].name};
   if(gameMode==='anim'){
     storeCur();
     const frames=anim.frames.map(f=>{const t=document.createElement('canvas');t.width=W;t.height=H;t.getContext('2d').drawImage(f,0,0,W,H);return t.toDataURL('image/jpeg',.8)});
@@ -2109,7 +2274,7 @@ async function renderSaved(){
   const kind=savedCat==='Dibujos'?'draw':'anim';
   const items=(await storeAll()).filter(x=>x.kind===kind).sort((a,b)=>b.date-a.date);
   if(!items.length){const p2=document.createElement('p');p2.className='tag';p2.style.gridColumn='1 / -1';
-    p2.textContent=kind==='draw'?'Todavía no guardas dibujos. En cualquier modo, presiona «Guardar» arriba del tablero.':'Todavía no guardas animaciones. Juega en Modo animación y presiona «Guardar».';g.appendChild(p2);return}
+    p2.textContent=kind==='draw'?'Todavía no guardas dibujos. En cualquier modo, presiona «Guardar» debajo del tablero.':'Todavía no guardas animaciones. Juega en Modo animación y presiona «Guardar».';g.appendChild(p2);return}
   for(const it of items){
     const d=document.createElement('div');d.className='item';
     d.innerHTML=`<div class="art"><img alt=""></div><h3></h3><span class="meta"></span><div class="row2"></div>`;
@@ -2182,7 +2347,26 @@ const SHOP=[
   {id:'mus-noche',cat:'Música',name:'Noche tranquila',desc:'Acordes suaves y lentos para relajarse.',price:30,music:'noche'},
   {id:'mus-bosque',cat:'Música',name:'Bosque',desc:'Una melodía alegre con pajaritos cantando.',price:30,music:'bosque'},
   {id:'m-arcoiris',cat:'Marcos',name:'Marco arcoíris',desc:'Seis colores alrededor del dibujo.',price:25,frame:'0 0 0 2px #E63B2E,0 0 0 4px #FF8A1F,0 0 0 6px #FFD23F,0 0 0 8px #3BB54A,0 0 0 10px #2C6BED,0 0 0 12px #8E44C9'},
+
+  {id:'esc-granja',cat:'Paisajes y dibujos',name:'Granja',desc:'Paisaje: un granero rojo, un silo y la cerca.',price:40},
+  {id:'esc-selva',cat:'Paisajes y dibujos',name:'Selva',desc:'Paisaje: lianas, hojas gigantes y un loro.',price:45},
+  {id:'esc-mar',cat:'Paisajes y dibujos',name:'Fondo del mar',desc:'Paisaje: corales, un cofre del tesoro y una medusa.',price:45},
+  {id:'esc-otono',cat:'Paisajes y dibujos',name:'Otoño',desc:'Paisaje: un árbol naranja, hojas caídas y una calabaza.',price:40},
+  {id:'esc-cascada',cat:'Paisajes y dibujos',name:'Cascada',desc:'Paisaje: una cascada, un lago y un arcoíris.',price:45},
+  {id:'dib-buho',cat:'Paisajes y dibujos',name:'Búho',desc:'Dibujo: un búho en una rama bajo la luna.',price:35},
+  {id:'dib-unicornio',cat:'Paisajes y dibujos',name:'Unicornio',desc:'Dibujo: un unicornio con cuerno dorado.',price:50},
+  {id:'dib-avion',cat:'Paisajes y dibujos',name:'Avión',desc:'Dibujo: un avión entre las nubes.',price:40},
+  {id:'dib-pinguino',cat:'Paisajes y dibujos',name:'Pingüino',desc:'Dibujo: un pingüino con bufanda en el hielo.',price:35},
+  {id:'dib-submarino',cat:'Paisajes y dibujos',name:'Submarino',desc:'Dibujo: un submarino amarillo bajo el mar.',price:40},
+  {id:'fr-pinguinos',cat:'Modo amigable',name:'Dos pingüinos',desc:'Mapa para dos jugadores, uno de cada lado de la barra.',price:30},
+  {id:'fr-sandias',cat:'Modo amigable',name:'Dos sandías',desc:'Mapa para dos jugadores, uno de cada lado de la barra.',price:30},
+  {id:'fr-buhos',cat:'Modo amigable',name:'Dos búhos',desc:'Mapa para dos jugadores, uno de cada lado de la barra.',price:30},
+  {id:'fr-caracoles',cat:'Modo amigable',name:'Dos caracoles',desc:'Mapa para dos jugadores, uno de cada lado de la barra.',price:30},
 ];
+SHOP.forEach(it=>{
+  if(it.cat==='Paisajes y dibujos'){const i=LEVELS.findIndex(L=>L.own===it.id);if(i>=0)it.scene=i}
+  if(it.cat==='Modo amigable'){const i=FR_SCENES.findIndex(F=>F.own===it.id);if(i>=0)it.frScene=i}
+});
 const SHOP_CATS=['Paisajes y dibujos','Modo amigable','Pinceles','Marcos','Música'];
 let shopCat='Paisajes y dibujos';
 const thumbCache={};
@@ -2368,7 +2552,8 @@ function newRound(){
   if(gameMode==='creative')startCreative();
   else if(gameMode==='friends')startFriends();
   else if(gameMode==='anim')startAnim();
-  else setLevel(gameMode==='pixel'&&CFG.scene!=='azar'?level:(level+1)%LEVELS.length);
+  else if(gameMode==='pixel'&&CFG.scene!=='azar')setLevel(level);
+  else{const ok=ownedLevels(),i=ok.indexOf(level);setLevel(ok[(i+1)%ok.length])}
 }
 $('play').onclick=()=>{
   ac();SFX.stage();show('game');
