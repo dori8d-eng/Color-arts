@@ -1,0 +1,668 @@
+<title>Color Arts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&display=swap">
+<style>
+/* Layout: a painter's worktable — gallery of canvases on top, the board in the middle, the numbered paint tray beside it (below on phones). */
+:root {
+  --bg: #eceff3;
+  --surface: #ffffff;
+  --ink: #1b2030;
+  --muted: #5d667a;
+  --line: #d4dae4;
+  --accent: #3352dd;
+  --accent-soft: #dfe5ff;
+  --good: #1f9d63;
+  --cell-empty-lo: 214;
+  --cell-empty-hi: 250;
+  --cell-num: #6b7489;
+  --cell-sel: #c3ceff;
+  --grid: rgba(27, 32, 48, .10);
+  --font-display: "Bagel Fat One", "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11141b; --surface: #1a1f2b; --ink: #edf0f6; --muted: #9aa3b8; --line: #2b3242;
+    --accent: #8098ff; --accent-soft: #263055; --good: #46c98d;
+    --cell-empty-lo: 34; --cell-empty-hi: 70; --cell-num: #a3acc0; --cell-sel: #3a4a8f;
+    --grid: rgba(237, 240, 246, .08); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11141b; --surface: #1a1f2b; --ink: #edf0f6; --muted: #9aa3b8; --line: #2b3242;
+  --accent: #8098ff; --accent-soft: #263055; --good: #46c98d;
+  --cell-empty-lo: 34; --cell-empty-hi: 70; --cell-num: #a3acc0; --cell-sel: #3a4a8f;
+  --grid: rgba(237, 240, 246, .08); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 20px;
+}
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 20px;
+}
+h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(34px, 6vw, 52px);
+  line-height: 1;
+  margin: 0;
+  letter-spacing: .5px;
+}
+h1 .dot { display: inline-block; width: .32em; height: .32em; border-radius: 50%; margin-left: .06em; vertical-align: .08em; }
+.tagline { margin: 0; color: var(--muted); max-width: 46ch; }
+
+/* Gallery */
+.gallery {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+.thumb {
+  flex: 0 0 auto;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  width: 104px;
+  padding: 10px 8px 8px;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.thumb:hover { border-color: var(--muted); }
+.thumb[aria-current="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.thumb:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.thumb canvas { width: 64px; height: 64px; image-rendering: pixelated; }
+.thumb .name { font-weight: 600; font-size: 13px; line-height: 1.2; }
+.thumb .pct { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.thumb .pct.done { color: var(--good); font-weight: 800; }
+
+/* Studio */
+.studio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .studio { grid-template-columns: minmax(0, 1fr); }
+}
+.board {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.board-head { display: grid; gap: 2px; }
+.board-head h2 { font-family: var(--font-display); font-weight: 400; font-size: 26px; margin: 0; line-height: 1.1; }
+.board-head .meta { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.canvas-holder { position: relative; width: 100%; display: grid; place-items: center; touch-action: none; }
+#art { display: block; max-width: 100%; cursor: crosshair; border-radius: 6px; }
+.progress { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.progress > i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .25s ease; }
+
+.tray {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+  display: grid;
+  gap: 14px;
+}
+.tray h3 { margin: 0; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 800; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 10px; }
+.swatch {
+  position: relative;
+  aspect-ratio: 1;
+  max-width: 100%;
+  border-radius: 50%;
+  border: 3px solid var(--surface);
+  box-shadow: 0 0 0 2px var(--line);
+  font: 800 18px/1 var(--font-body);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--accent); transform: scale(1.06); }
+.swatch .left {
+  position: absolute; right: -6px; bottom: -6px;
+  min-width: 24px; height: 20px; padding: 0 5px;
+  border-radius: 99px; background: var(--ink); color: var(--surface);
+  font: 800 11px/20px var(--font-body); font-variant-numeric: tabular-nums;
+}
+.swatch.complete .left { background: var(--good); color: #fff; }
+.swatch.nudge { animation: nudge .45s ease; }
+@keyframes nudge { 0%,100% { transform: scale(1); } 30% { transform: scale(1.18); } 60% { transform: scale(.94); } }
+
+.tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  appearance: none;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 99px;
+  padding: 8px 14px;
+  font: 600 14px/1.2 var(--font-body);
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.btn.warn { border-color: #d9534f; color: #d9534f; }
+.howto { margin: 0; color: var(--muted); font-size: 13px; }
+.howto b { color: var(--ink); }
+
+/* Finish overlay */
+.finish {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  border-radius: 6px;
+  text-align: center;
+}
+.finish-card { display: grid; gap: 10px; justify-items: center; padding: 18px 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
+.finish-card strong { font-family: var(--font-display); font-weight: 400; font-size: 28px; line-height: 1.1; }
+.finish-card span { color: var(--muted); font-size: 14px; }
+#confetti { position: absolute; inset: 0; pointer-events: none; width: 100%; height: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .swatch, .progress > i { transition: none; }
+  .swatch.nudge { animation: none; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Color Arts<span class="dot" style="background:#e94b5b"></span><span class="dot" style="background:#f2b632"></span><span class="dot" style="background:#3bb273"></span></h1>
+    <p class="tagline">Pinta por números. Elige un color de la paleta y toca o arrastra sobre las casillas con su número hasta completar la obra.</p>
+  </header>
+
+  <nav class="gallery" id="gallery" aria-label="Obras"></nav>
+
+  <main class="studio">
+    <section class="board" aria-label="Lienzo">
+      <div class="board-head">
+        <h2 id="picName">—</h2>
+        <span class="meta" id="picMeta"></span>
+      </div>
+      <div class="canvas-holder" id="holder">
+        <canvas id="art" aria-label="Lienzo para pintar"></canvas>
+        <canvas id="confetti" hidden></canvas>
+        <div class="finish" id="finish" hidden>
+          <div class="finish-card">
+            <strong>¡Obra terminada!</strong>
+            <span id="finishText"></span>
+            <button class="btn primary" id="nextBtn" type="button">Siguiente obra</button>
+          </div>
+        </div>
+      </div>
+      <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+    </section>
+
+    <aside class="tray" aria-label="Paleta">
+      <h3>Paleta</h3>
+      <div class="swatches" id="swatches"></div>
+      <div class="tools">
+        <button class="btn" id="peekBtn" type="button">Mantén para ver el original</button>
+        <button class="btn" id="resetBtn" type="button">Reiniciar</button>
+      </div>
+      <p class="howto">Las casillas del color elegido se <b>resaltan</b> en el lienzo. El número pequeño en cada color indica cuántas casillas faltan. Tu avance se guarda en este navegador.</p>
+    </aside>
+  </main>
+</div>
+
+<script>
+(() => {
+  const PICTURES = [
+    { id: "corazon", name: "Corazón",
+      colors: { ".": "#f6e7ee", "D": "#8e1b3a", "R": "#e33a55", "r": "#ff9fb0" },
+      rows: [
+        ".............",
+        "..DDD...DDD..",
+        ".DRRRD.DRRRD.",
+        "DRrrRRDRRRRRD",
+        "DRrRRRRRRRRRD",
+        "DRRRRRRRRRRRD",
+        ".DRRRRRRRRRD.",
+        "..DRRRRRRRD..",
+        "...DRRRRRD...",
+        "....DRRRD....",
+        ".....DRD.....",
+        "......D......"
+      ] },
+    { id: "flor", name: "Flor",
+      colors: { ".": "#e8f3fb", "P": "#f27fb2", "p": "#c2457f", "Y": "#f6c445", "G": "#4cb05c", "g": "#2a7a3f" },
+      rows: [
+        "................",
+        "......PPPP......",
+        "...PP.PPPP.PP...",
+        "..PPPPpPPpPPPP..",
+        "..PPPPPYYPPPPP..",
+        "...PPPYYYYPPP...",
+        ".PPPpPYYYYPpPPP.",
+        ".PPPPPPYYPPPPPP.",
+        "..PPP.PPPP.PPP..",
+        "......PPPP......",
+        ".......GG.......",
+        "..gg...GG...gg..",
+        "..gGG..GG..GGg..",
+        "...gGGGGGGGGg...",
+        ".....gGGGGg.....",
+        ".......GG......."
+      ] },
+    { id: "gato", name: "Gato",
+      colors: { ".": "#d8f0e6", "K": "#2b2433", "O": "#f08a2c", "W": "#fff6ea", "G": "#5fc46a", "P": "#f28aa0" },
+      rows: [
+        "................",
+        "..K..........K..",
+        "..KK........KK..",
+        "..KOK......KOK..",
+        "..KOOKKKKKKOOK..",
+        ".KOOOOOOOOOOOOK.",
+        ".KOOOOOOOOOOOOK.",
+        ".KOOGKOOOOGKOOK.",
+        ".KOOGGOOOOGGOOK.",
+        ".KOOOOOOOOOOOOK.",
+        ".KOWWOOPPOOWWOK.",
+        ".KWWWWOKKOWWWWK.",
+        "..KWWWWWWWWWWK..",
+        "...KKWWWWWWKK...",
+        ".....KKKKKK.....",
+        "................"
+      ] },
+    { id: "hongo", name: "Hongo",
+      colors: { ".": "#cfe9ff", "K": "#3a2420", "R": "#e2392f", "W": "#ffffff", "C": "#f3dcb4", "G": "#58b947" },
+      rows: [
+        "................",
+        ".....KKKKKK.....",
+        "...KKRRRRRRKK...",
+        "..KRRWWRRRRRRK..",
+        ".KRRWWWWRRWWRRK.",
+        ".KRRWWWWRRWWRRK.",
+        "KRRRRWWRRRRRRRRK",
+        "KRWWRRRRRRWWWRRK",
+        "KRWWRRRRRRWWWRRK",
+        ".KKKKKKKKKKKKKK.",
+        "....KCCCCCCK....",
+        "....KCKCCKCK....",
+        "....KCCCCCCK....",
+        "....KCCCCCCK....",
+        "GGGGGKKKKKKGGGGG",
+        "GGGGGGGGGGGGGGGG"
+      ] },
+    { id: "cohete", name: "Cohete",
+      colors: { ".": "#1d2550", "S": "#ffe27a", "R": "#e8443a", "W": "#f1f3f8", "B": "#4fb3ff", "O": "#ff8a1f", "Y": "#ffd23f" },
+      rows: [
+        ".S.....R.......",
+        "......RRR....S.",
+        ".....RRRRR.....",
+        ".....WWWWW.....",
+        ".....WBBBW..S..",
+        "..S..WBBBW.....",
+        ".....WWWWW.....",
+        ".....WWWWW.....",
+        "....RWWWWWR....",
+        "...RRWRRRWRR...",
+        "..RRRWWWWWRRR..",
+        "..RR.RRRRR.RR..",
+        ".....OYOYO.....",
+        ".S....OYO......",
+        "......OYO....S.",
+        ".......O......."
+      ] },
+    { id: "velero", name: "Velero",
+      colors: { ".": "#bfe4ff", "R": "#e8443a", "Y": "#ffcc33", "K": "#5a3b22", "W": "#ffffff", "B": "#b5652d", "L": "#45a6e6", "N": "#1f5f9e" },
+      rows: [
+        "..................",
+        ".........R....YY..",
+        ".........RR..YYYY.",
+        ".........K...YYYY.",
+        "........WK....YY..",
+        ".......WWK.W......",
+        "......WWWK.WW.....",
+        ".....WWWWK.WWW....",
+        "....WWWWWK.WWWW...",
+        "...WWWWWWK.WWWWW..",
+        "..WWWWWWWK.WWWWWW.",
+        ".........K........",
+        ".BBBBBBBBBBBBBBBB.",
+        "LLBBBBBBBBBBBBBBLL",
+        "LLLBBBBBBBBBBBBLLL",
+        "NLLLNNLLLNNLLLNNLL",
+        "NNNNNNNNNNNNNNNNNN"
+      ] }
+  ];
+
+  // Build numeric data for each picture: palette ordered by first appearance.
+  for (const p of PICTURES) {
+    p.h = p.rows.length;
+    p.w = p.rows[0].length;
+    const order = [];
+    for (const r of p.rows) for (const ch of r) if (!order.includes(ch)) order.push(ch);
+    p.palette = order.map(ch => p.colors[ch]);
+    p.cells = new Uint8Array(p.w * p.h);
+    p.rows.forEach((r, y) => { if (r.length !== p.w) console.warn("Fila irregular", p.id, y); [...r].forEach((ch, x) => { p.cells[y * p.w + x] = order.indexOf(ch); }); });
+    p.counts = p.palette.map((_, i) => p.cells.reduce((n, c) => n + (c === i), 0));
+  }
+
+  // ---------- persistence ----------
+  const KEY = "colorarts.v1";
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { saved = {}; }
+  const hotData = window.claude?.hot?.data;
+  if (hotData && hotData.saved) saved = hotData.saved;
+
+  const painted = {};
+  for (const p of PICTURES) {
+    const s = saved[p.id] || "";
+    const arr = new Uint8Array(p.w * p.h);
+    for (let i = 0; i < arr.length && i < s.length; i++) arr[i] = s[i] === "1" ? 1 : 0;
+    painted[p.id] = arr;
+  }
+  function persist(p) {
+    saved[p.id] = Array.from(painted[p.id]).join("");
+    try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+  }
+
+  // ---------- helpers ----------
+  const $ = id => document.getElementById(id);
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  function lum(h) { const [r, g, b] = hexToRgb(h); return (0.299 * r + 0.587 * g + 0.114 * b) / 255; }
+  function grayFor(hex) {
+    const lo = parseFloat(css("--cell-empty-lo")) || 214, hi = parseFloat(css("--cell-empty-hi")) || 250;
+    const v = Math.round(lo + (hi - lo) * lum(hex));
+    return `rgb(${v},${v},${Math.min(255, v + 4)})`;
+  }
+  function textOn(hex) { return lum(hex) > 0.6 ? "#1b2030" : "#ffffff"; }
+  function remaining(p, i) { const pa = painted[p.id]; let n = 0; for (let k = 0; k < p.cells.length; k++) if (p.cells[k] === i && !pa[k]) n++; return n; }
+  function doneCount(p) { return painted[p.id].reduce((a, b) => a + b, 0); }
+
+  // ---------- state ----------
+  let cur = PICTURES[0];
+  let sel = 0;
+  let peeking = false;
+  const startId = (hotData && hotData.cur) || (() => { try { return localStorage.getItem(KEY + ".cur"); } catch (e) { return null; } })();
+  const found = PICTURES.find(p => p.id === startId);
+  if (found) cur = found;
+
+  // ---------- gallery ----------
+  const gallery = $("gallery");
+  const thumbs = {};
+  for (const p of PICTURES) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "thumb";
+    b.innerHTML = `<canvas width="${p.w}" height="${p.h}"></canvas><span class="name">${p.name}</span><span class="pct"></span>`;
+    b.addEventListener("click", () => openPicture(p));
+    gallery.appendChild(b);
+    thumbs[p.id] = b;
+  }
+  function drawThumb(p) {
+    const b = thumbs[p.id];
+    const c = b.querySelector("canvas"), g = c.getContext("2d");
+    const pa = painted[p.id];
+    for (let y = 0; y < p.h; y++) for (let x = 0; x < p.w; x++) {
+      const k = y * p.w + x, col = p.palette[p.cells[k]];
+      g.fillStyle = pa[k] ? col : grayFor(col);
+      g.fillRect(x, y, 1, 1);
+    }
+    const pct = Math.floor(doneCount(p) / p.cells.length * 100);
+    const el = b.querySelector(".pct");
+    el.textContent = pct === 100 ? "Terminada" : pct + " %";
+    el.classList.toggle("done", pct === 100);
+    b.setAttribute("aria-current", p === cur ? "true" : "false");
+    b.setAttribute("aria-label", `${p.name}, ${pct === 100 ? "terminada" : pct + " por ciento"}`);
+  }
+
+  // ---------- swatches ----------
+  const swWrap = $("swatches");
+  function buildSwatches() {
+    swWrap.innerHTML = "";
+    cur.palette.forEach((col, i) => {
+      const s = document.createElement("button");
+      s.type = "button"; s.className = "swatch";
+      s.style.background = col; s.style.color = textOn(col);
+      s.innerHTML = `${i + 1}<span class="left"></span>`;
+      s.addEventListener("click", () => { sel = i; render(); });
+      swWrap.appendChild(s);
+    });
+  }
+  function updateSwatches() {
+    [...swWrap.children].forEach((s, i) => {
+      const left = remaining(cur, i);
+      s.setAttribute("aria-pressed", i === sel ? "true" : "false");
+      s.classList.toggle("complete", left === 0);
+      s.querySelector(".left").textContent = left === 0 ? "✓" : left;
+      s.setAttribute("aria-label", `Color ${i + 1}, ${left === 0 ? "completo" : "faltan " + left}`);
+    });
+  }
+  function nudge(i) {
+    const s = swWrap.children[i]; if (!s) return;
+    s.classList.remove("nudge"); void s.offsetWidth; s.classList.add("nudge");
+  }
+
+  // ---------- board ----------
+  const art = $("art"), ctx = art.getContext("2d"), holder = $("holder");
+  let cell = 20;
+  function layout() {
+    const maxW = holder.clientWidth;
+    const maxH = Math.max(260, Math.min(window.innerHeight * 0.68, 640));
+    cell = Math.max(10, Math.floor(Math.min(maxW / cur.w, maxH / cur.h)));
+    const dpr = window.devicePixelRatio || 1;
+    art.style.width = cur.w * cell + "px";
+    art.style.height = cur.h * cell + "px";
+    art.width = Math.round(cur.w * cell * dpr);
+    art.height = Math.round(cur.h * cell * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawBoard();
+  }
+  function drawCell(k) {
+    const p = cur, x = k % p.w, y = (k / p.w) | 0;
+    const c = p.cells[k], col = p.palette[c], pa = painted[p.id][k];
+    const px = x * cell, py = y * cell;
+    if (pa || peeking) {
+      ctx.fillStyle = col; ctx.fillRect(px, py, cell, cell);
+      return;
+    }
+    ctx.fillStyle = c === sel ? css("--cell-sel") : grayFor(col);
+    ctx.fillRect(px, py, cell, cell);
+    ctx.strokeStyle = css("--grid"); ctx.lineWidth = 1;
+    ctx.strokeRect(px + .5, py + .5, cell - 1, cell - 1);
+    if (cell >= 13) {
+      ctx.fillStyle = c === sel ? css("--ink") : css("--cell-num");
+      ctx.font = `${c === sel ? 800 : 600} ${Math.round(cell * 0.46)}px Figtree, system-ui, sans-serif`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(String(c + 1), px + cell / 2, py + cell / 2 + 1);
+    }
+  }
+  function drawBoard() {
+    ctx.clearRect(0, 0, cur.w * cell, cur.h * cell);
+    for (let k = 0; k < cur.cells.length; k++) drawCell(k);
+  }
+  function updateMeta() {
+    const d = doneCount(cur), t = cur.cells.length;
+    $("picName").textContent = cur.name;
+    $("picMeta").textContent = `${cur.w}×${cur.h} casillas · ${cur.palette.length} colores · ${d}/${t}`;
+    $("bar").style.width = (d / t * 100) + "%";
+  }
+  function render() {
+    drawBoard(); updateSwatches(); updateMeta(); drawThumb(cur);
+  }
+
+  function openPicture(p) {
+    const prev = cur;
+    cur = p;
+    try { localStorage.setItem(KEY + ".cur", p.id); } catch (e) {}
+    sel = firstIncomplete(0);
+    $("finish").hidden = !(doneCount(p) === p.cells.length);
+    if (!$("finish").hidden) $("finishText").textContent = finishLine();
+    stopConfetti();
+    buildSwatches();
+    drawThumb(prev);
+    layout();
+    render();
+    resetArm(false);
+  }
+  function firstIncomplete(from) {
+    const n = cur.palette.length;
+    for (let j = 0; j < n; j++) { const i = (from + j) % n; if (remaining(cur, i) > 0) return i; }
+    return 0;
+  }
+
+  // ---------- painting ----------
+  let down = false, lastK = -1, moved = false;
+  function cellAt(e) {
+    const r = art.getBoundingClientRect();
+    const x = Math.floor((e.clientX - r.left) / (r.width / cur.w));
+    const y = Math.floor((e.clientY - r.top) / (r.height / cur.h));
+    if (x < 0 || y < 0 || x >= cur.w || y >= cur.h) return -1;
+    return y * cur.w + x;
+  }
+  function tryPaint(k, isTap) {
+    if (k < 0 || k === lastK) return;
+    lastK = k;
+    const pa = painted[cur.id];
+    if (pa[k]) return;
+    if (cur.cells[k] !== sel) { if (isTap) nudge(cur.cells[k]); return; }
+    pa[k] = 1;
+    drawCell(k);
+    if (remaining(cur, sel) === 0) {
+      updateSwatches();
+      if (doneCount(cur) === cur.cells.length) { finishPicture(); }
+      else { sel = firstIncomplete(sel + 1); drawBoard(); }
+    }
+    queueSave();
+  }
+  let saveTimer = 0;
+  function queueSave() {
+    updateSwatches(); updateMeta();
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { persist(cur); drawThumb(cur); }, 150);
+  }
+  art.addEventListener("pointerdown", e => {
+    if (!$("finish").hidden) return;
+    down = true; moved = false; lastK = -1;
+    art.setPointerCapture(e.pointerId);
+    tryPaint(cellAt(e), true);
+  });
+  art.addEventListener("pointermove", e => { if (!down) return; moved = true; tryPaint(cellAt(e), false); });
+  const end = () => { down = false; lastK = -1; };
+  art.addEventListener("pointerup", end);
+  art.addEventListener("pointercancel", end);
+
+  // ---------- keyboard: number keys pick colors ----------
+  document.addEventListener("keydown", e => {
+    const n = parseInt(e.key, 10);
+    if (n >= 1 && n <= cur.palette.length) { sel = n - 1; render(); }
+  });
+
+  // ---------- peek ----------
+  const peekBtn = $("peekBtn");
+  const peekOn = e => { e.preventDefault(); peeking = true; drawBoard(); };
+  const peekOff = () => { if (!peeking) return; peeking = false; drawBoard(); };
+  peekBtn.addEventListener("pointerdown", peekOn);
+  peekBtn.addEventListener("pointerup", peekOff);
+  peekBtn.addEventListener("pointerleave", peekOff);
+  peekBtn.addEventListener("pointercancel", peekOff);
+  peekBtn.addEventListener("keydown", e => { if (e.key === " " || e.key === "Enter") peekOn(e); });
+  peekBtn.addEventListener("keyup", peekOff);
+
+  // ---------- reset (two-step, in-page confirm) ----------
+  const resetBtn = $("resetBtn");
+  let armed = false, armTimer = 0;
+  function resetArm(on) {
+    armed = on; clearTimeout(armTimer);
+    resetBtn.textContent = on ? "¿Borrar? Toca otra vez" : "Reiniciar";
+    resetBtn.classList.toggle("warn", on);
+    if (on) armTimer = setTimeout(() => resetArm(false), 3000);
+  }
+  resetBtn.addEventListener("click", () => {
+    if (!armed) { resetArm(true); return; }
+    painted[cur.id].fill(0); persist(cur);
+    resetArm(false);
+    openPicture(cur);
+  });
+
+  // ---------- finish + confetti ----------
+  function finishLine() { return `${cur.name}: ${cur.cells.length} casillas pintadas con ${cur.palette.length} colores.`; }
+  function finishPicture() {
+    persist(cur); drawThumb(cur); updateMeta(); drawBoard();
+    $("finishText").textContent = finishLine();
+    $("finish").hidden = false;
+    confetti();
+  }
+  $("nextBtn").addEventListener("click", () => {
+    const i = PICTURES.indexOf(cur);
+    let next = PICTURES.find((p, j) => j > i && doneCount(p) < p.cells.length) ||
+               PICTURES.find(p => doneCount(p) < p.cells.length) ||
+               PICTURES[(i + 1) % PICTURES.length];
+    openPicture(next);
+  });
+
+  const cf = $("confetti"), cg = cf.getContext("2d");
+  let raf = 0;
+  function stopConfetti() { cancelAnimationFrame(raf); cf.hidden = true; }
+  function confetti() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    cf.hidden = false;
+    const W = cf.width = holder.clientWidth, H = cf.height = holder.clientHeight;
+    const parts = Array.from({ length: 120 }, () => ({
+      x: W / 2 + (Math.random() - .5) * 60, y: H * .55,
+      vx: (Math.random() - .5) * 9, vy: -Math.random() * 11 - 4,
+      s: 4 + Math.random() * 5, r: Math.random() * 6, vr: (Math.random() - .5) * .3,
+      c: cur.palette[(Math.random() * cur.palette.length) | 0]
+    }));
+    let t = 0;
+    const step = () => {
+      cg.clearRect(0, 0, W, H);
+      for (const q of parts) {
+        q.vy += .32; q.x += q.vx; q.y += q.vy; q.r += q.vr;
+        cg.save(); cg.translate(q.x, q.y); cg.rotate(q.r);
+        cg.fillStyle = q.c; cg.fillRect(-q.s / 2, -q.s / 2, q.s, q.s * .6); cg.restore();
+      }
+      if (++t < 130) raf = requestAnimationFrame(step); else stopConfetti();
+    };
+    raf = requestAnimationFrame(step);
+  }
+
+  // ---------- boot ----------
+  window.claude?.hot?.snapshot?.(() => ({ saved, cur: cur.id }));
+  for (const p of PICTURES) drawThumb(p);
+  openPicture(cur);
+  let rt = 0;
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(layout, 80); });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => { for (const p of PICTURES) drawThumb(p); drawBoard(); });
+  new MutationObserver(() => { for (const p of PICTURES) drawThumb(p); drawBoard(); })
+    .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawBoard);
+})();
+</script>
