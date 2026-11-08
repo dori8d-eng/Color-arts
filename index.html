@@ -1246,11 +1246,11 @@ function setPhase(p){
   if(p==='whiten'){say('¡Prepárate para pintar!');SFX.whoosh()}
   if(p==='paint'){
     $('finish').hidden=$('finishNoAI').hidden=awarded||gameMode==='pixel';
-    $('saveBtn').hidden=awarded||gameMode==='friends';
+    $('saveBtn').hidden=awarded||gameMode==='friends';if(aiOK===false)$('finishNoAI').hidden=true;
     $('animPanel').hidden=gameMode!=='anim';if(gameMode==='anim')renderFrames();
     if(gameMode==='pixel'){say('Elige un número y pinta sus cuadritos. Al completar todos, terminas.');$('pxPanel').hidden=false;renderPx()}
     else{if(gameMode==='friends'){resetFriends();renderDuo()}
-      say(gameMode==='friends'?'Cada quien pinta su lado de la barra de rayas. No se puede pintar del otro lado.':gameMode==='anim'?'Dibuja el primer fotograma. Agrega más, presiona «Reproducir» y, cuando esté lista, «Terminé» para que la IA la califique.':gameMode==='nocolor'?'Todo está en blanco y negro. Pinta como quieras y al presionar «Terminé» descubrirás los colores.':gameMode==='creative'?'Dibuja lo que quieras. Al terminar, presiona «Terminé» y una IA lo calificará.':'Elige un color y pinta el dibujo.');const pn=$('paint');pn.hidden=false;pn.classList.add('in')}
+      say(gameMode==='friends'?'Cada quien pinta su lado de la barra de rayas. No se puede pintar del otro lado.':gameMode==='anim'?(aiOK===false?'Dibuja el primer fotograma. Agrega más, presiona «Reproducir» y, cuando esté lista, «Terminé» para calificarla.':'Dibuja el primer fotograma. Agrega más, presiona «Reproducir» y, cuando esté lista, «Terminé» para que la IA la califique.'):gameMode==='nocolor'?'Todo está en blanco y negro. Pinta como quieras y al presionar «Terminé» descubrirás los colores.':gameMode==='creative'?(aiOK===false?'Dibuja lo que quieras. Al terminar, presiona «Terminé» y el juego lo calificará.':'Dibuja lo que quieras. Al terminar, presiona «Terminé» y una IA lo calificará.'):'Elige un color y pinta el dibujo.');const pn=$('paint');pn.hidden=false;pn.classList.add('in')}
   }
   updMoves();
 }
@@ -1643,7 +1643,14 @@ function getSampler(){
   if(!samplerP)samplerP=(window.claude&&window.claude.use?Promise.resolve(window.claude.use('sample')):Promise.resolve(null)).catch(()=>null);
   return samplerP;
 }
-getSampler();
+// Fuera de Claude (por ejemplo en GitHub) no hay IA: se quitan los textos que la mencionan
+let aiOK=null;
+getSampler().then(async sp=>{let ok=false;if(sp){const lim=await sp.limits().catch(()=>null);ok=!!(lim&&lim.images)}aiOK=ok;applyAIText()});
+function applyAIText(){
+  const c=document.querySelector('#cfg [data-v="creative"] small');
+  if(c)c.textContent=aiOK===false?'Dibuja libre y gana monedas':'Dibuja libre, una IA lo califica';
+  if(aiOK===false)$('finishNoAI').hidden=true;
+}
 function localBeauty(cnv){
   const C=cnv||paintCv,d=C.getContext('2d').getImageData(0,0,C.width,C.height).data,w=C.width;
   let tot=0,ink=0;const bins=new Map();
@@ -1769,7 +1776,7 @@ let gradeRound=0,gradeCtl=null,gradeNoAI=false;
 async function gradeCreative(kind,extraNote){
   const myRound=gradeRound,el=$('grade');
   el.innerHTML='<span class="num">…</span><p><b></b><br>Esto tarda unos segundos.</p>';
-  el.querySelector('b').textContent=gradeNoAI?'Calificando…':(AI_WAIT[kind]||AI_WAIT.creative);el.hidden=false;
+  el.querySelector('b').textContent=gradeNoAI||aiOK===false?'Calificando…':(AI_WAIT[kind]||AI_WAIT.creative);el.hidden=false;
   say('Calificando…');
   let score=null,comment='',scribAI=false,skipped=false,aiScore=null;
   const rs=kind==='creative'||kind==='anim'?null:regionStats();
@@ -1819,7 +1826,7 @@ async function gradeCreative(kind,extraNote){
     showGrade(0,'¡Eso parece un garabato!',(byAI&&comment?comment.replace(/[\s.]*$/,'.')+' ':'')+'Los garabatos no ganan monedas. Pinta con cuidado para ganar.',0);
     if(gameMode==='friends')$('grade').scrollIntoView({block:'nearest',behavior:'smooth'});return;
   }
-  if(!byAI){score=localGrade(kind);comment=skipped?'Calificado por el juego.':'La IA no estuvo disponible, así que el juego lo calificó solo.'}
+  if(!byAI){score=localGrade(kind);comment=skipped||aiOK===false?'Calificado por el juego.':'La IA no estuvo disponible, así que el juego lo calificó solo.'}
   showGrade(Math.max(1,Math.min(10,score)),byAI?'La IA dice:':'Calificación del juego',comment+(extraNote?' '+extraNote:'')+(how?` (${how})`:''));
   if(gameMode==='friends')$('grade').scrollIntoView({block:'nearest',behavior:'smooth'});
 }
