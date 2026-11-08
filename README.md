@@ -25,4 +25,13 @@ Cada dibujo tiene muchas partes para colorear (de 11 a 22). Hay 38 paisajes y di
 
 Abre `index.html` en cualquier navegador. No necesita instalación. El progreso (monedas, colores, compras y guardados) se queda en el navegador.
 
+## Calificación
+
+La IA recibe el dibujo, su nombre, cada parte con su color original y las partes que quedaron sin pintar. La nota final combina lo que dice la IA con lo que mide el juego:
+
+- **Rompecabezas y Sin color:** se mezcla con los colores medidos parte por parte (las partes chicas cuentan casi igual que las grandes).
+- **Amigable:** se mezcla con cuánto se pintó.
+- **Creativo y Animación:** un dibujo hecho en pocos segundos no puede sacar la nota más alta.
+- Solo cuenta como garabato si la IA lo dice y el juego también ve poco esfuerzo o trazos sin sentido.
+
 La calificación con IA solo funciona dentro de Claude; fuera de ahí el juego califica por su cuenta.

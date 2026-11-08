@@ -1654,21 +1654,26 @@ function localBeauty(cnv){
   const cover=ink/tot,variety=[...bins.values()].filter(v=>v>tot*.004).length;
   return Math.max(1,Math.min(10,Math.round(1+cover*5+Math.min(4,variety*.7))));
 }
-const AI_BASE='Eres el jurado de un juego de dibujo para niños llamado Color Arts. Hablas con cariño pero calificas en serio, porque las calificaciones dan monedas. ';
+const AI_BASE='Eres el jurado de un juego de dibujo para niños de 6 a 12 años llamado Color Arts. Hablas con cariño pero calificas en serio y de forma pareja, porque las calificaciones dan monedas. '+
+ 'Sé justo: califica lo que se ve en la imagen y los datos que mide el juego, no el estilo ni lo que tú habrías hecho. Un niño que pintó con cuidado merece buena nota aunque no sea perfecto; no regales notas altas a dibujos con poco trabajo. ';
 // La IA califica por partes (0 a 10) y el juego calcula la nota final: así es más parejo
 const AI_RUBRIC={
   creative:{text:'Mira el dibujo libre.',keys:{se_entiende:.3,colores:.2,relleno:.25,detalle:.25}},
   puzzle:{text:'La imagen tiene dos partes: a la IZQUIERDA el paisaje original y a la DERECHA cómo lo coloreó el jugador.',keys:{parecido:.5,relleno:.3,colores:.2}},
-  nocolor:{text:'La imagen tiene dos partes: a la IZQUIERDA el paisaje original y a la DERECHA cómo lo coloreó el jugador SIN ver los colores (pintaba en blanco y negro).',keys:{parecido:.45,relleno:.35,colores:.2}},
+  nocolor:{text:'La imagen tiene dos partes: a la IZQUIERDA el paisaje original y a la DERECHA cómo lo coloreó el jugador SIN ver los colores (pintaba en blanco y negro). Como no veía los colores, sé comprensivo con el parecido: cuenta como bien un color de la misma familia (por ejemplo cualquier azul para el cielo).',keys:{parecido:.3,relleno:.45,colores:.25}},
   friends:{text:'Dos jugadores colorearon juntos este dibujo, cada uno de un lado de la línea de rayas.',keys:{se_entiende:.2,colores:.3,relleno:.35,detalle:.15}},
   anim:{text:'La imagen muestra los fotogramas de una animación en orden (izquierda a derecha, arriba a abajo).',keys:{se_entiende:.25,colores:.15,relleno:.15,detalle:.2,movimiento:.25}},
 };
-const AI_KEYDESC={se_entiende:'se entiende qué es lo que dibujó',colores:'usa varios colores que combinan bien',relleno:'las formas están rellenas, no solo contornos ni partes en blanco',
-  detalle:'tiene detalles y cuidado',parecido:'cada parte tiene un color parecido al original',movimiento:'se nota que algo se mueve o cambia entre fotogramas'};
+const AI_KEYDESC={se_entiende:'se entiende qué es lo que dibujó (0 = no se reconoce nada, 5 = se adivina, 10 = se reconoce enseguida)',
+  colores:'usa varios colores que combinan bien (0 = un solo color, 5 = pocos colores, 10 = muchos colores bien elegidos)',
+  relleno:'las formas están rellenas, sin huecos blancos ni solo contornos (usa el porcentaje pintado que mide el juego: menos de 40% no pasa de 4, más de 85% puede ser 8 o más)',
+  detalle:'tiene detalles y cuidado (0 = nada, 5 = algunos, 10 = muchos detalles cuidados)',
+  parecido:'cada parte tiene un color parecido al original (usa cuántas partes midió el juego como parecidas)',
+  movimiento:'se nota que algo se mueve o cambia entre fotogramas (0 = todos iguales, 10 = movimiento claro)'};
 function aiPrompt(kind,stats){
   const R=AI_RUBRIC[kind]||AI_RUBRIC.creative,keys=Object.keys(R.keys);
   return AI_BASE+R.text+' '+
-   `Datos medidos por el juego: ${stats}. `+
+   `Datos medidos por el juego: ${stats.replace(/[.\s]+$/,'')}. `+
    'Califica cada punto del 0 al 10: '+keys.map(k=>`"${k}" = ${AI_KEYDESC[k]}`).join('; ')+'. '+
    'Usa toda la escala: 0-2 casi nada, 3-4 sencillo, 5-6 con esfuerzo, 7-8 bien hecho, 9-10 excelente. '+
    'Un dibujo de pocos colores pero relleno y que se entiende sí tiene esfuerzo. '+
@@ -1766,7 +1771,8 @@ async function gradeCreative(kind,extraNote){
   el.innerHTML='<span class="num">…</span><p><b></b><br>Esto tarda unos segundos.</p>';
   el.querySelector('b').textContent=gradeNoAI?'Calificando…':(AI_WAIT[kind]||AI_WAIT.creative);el.hidden=false;
   say('Calificando…');
-  let score=null,comment='',scribAI=false,skipped=false;
+  let score=null,comment='',scribAI=false,skipped=false,aiScore=null;
+  const rs=kind==='creative'||kind==='anim'?null:regionStats();
   gradeCtl=new AbortController();const ctl=gradeCtl;
   if(gradeNoAI)skipped=true;
   // Si la IA tarda demasiado, el juego califica solo
@@ -1778,11 +1784,12 @@ async function gradeCreative(kind,extraNote){
       if(lim&&lim.images){
         const img=aiImage(kind),blob=await new Promise(r=>img.toBlob(r,'image/png'));
         const cov=kind==='anim'?(storeCur(),anim.frames.reduce((a,f)=>a+inkOf(f),0)/anim.frames.length):inkOf();
-        const stats=`pintó el ${Math.round(cov*100)}% del dibujo, usó ${colorCount(kind==='anim'?anim.frames[anim.cur]:paintCv)} colores distintos`+(kind==='anim'?`, ${anim.frames.length} fotogramas`:'')+`, pintó durante ${Math.round(scrib.time/1000)} segundos con ${scrib.strokes} trazos y ${scrib.fills} rellenos con cubeta`;
+        const scene=kind==='puzzle'||kind==='nocolor'?LEVELS[level].name:kind==='friends'?(FR_SCENES[frScene]||{}).name:'';
+        const stats=(scene?`el dibujo se llama «${scene}»; `:'')+`pintó el ${Math.round(cov*100)}% del dibujo, usó ${colorCount(kind==='anim'?anim.frames[anim.cur]:paintCv)} colores distintos`+(kind==='anim'?`, ${anim.frames.length} fotogramas`:'')+`, pintó durante ${Math.round(scrib.time/1000)} segundos con ${scrib.strokes} trazos y ${scrib.fills} rellenos con cubeta.`+(kind==='anim'?'':statsText(kind,rs));
         const res=await sample.json(aiPrompt(kind,stats),{images:[blob],cache:false,signal:ctl.signal});
         const R=(AI_RUBRIC[kind]||AI_RUBRIC.creative).keys;let sum=0,wsum=0;
         for(const [k,w] of Object.entries(R)){const v=Number(res&&res[k]);if(isFinite(v)){sum+=Math.max(0,Math.min(10,v))*w;wsum+=w}}
-        if(wsum>=.5){score=Math.round(sum/wsum);comment=String((res.comentario||res.comment||'')).slice(0,320);scribAI=res.garabato===true||res.garabato==='true'}
+        if(wsum>=.5){aiScore=sum/wsum;score=Math.round(aiScore);comment=String((res.comentario||res.comment||'')).slice(0,320);scribAI=res.garabato===true||res.garabato==='true'}
       }
     }
   }catch(e){console.warn('IA no disponible',e&&e.code)}
@@ -1790,14 +1797,30 @@ async function gradeCreative(kind,extraNote){
   // Si ya empezó otra partida o saliste al menú, esta calificación ya no cuenta
   if(myRound!==gradeRound||$('game').hidden)return;
   const byAI=score!==null;
-  const scribble=byAI?(scribAI||lowEffort()):isScribbleLocal();
+  // La IA puede confundirse: solo cuenta como garabato si el juego también ve poco esfuerzo o trazos sin sentido
+  const scribble=byAI?((scribAI&&(isScribbleLocal()||effortCap()<=3))||lowEffort()):isScribbleLocal();
+  let how='';
+  if(byAI&&!scribble){
+    if(kind==='puzzle'||kind==='nocolor'){
+      // Lo que mide el juego (colores parte por parte) pesa casi la mitad
+      const g=gradePainting(rs),wAI=kind==='nocolor'?.65:.55;
+      score=Math.round(aiScore*wAI+g*(1-wAI));how=`IA ${Math.round(aiScore)} · colores medidos ${g}`;
+    }else if(kind==='friends'){
+      const cov=inkOf(),g=Math.round(Math.min(10,cov*11));
+      score=Math.round(aiScore*.75+g*.25);how=`IA ${Math.round(aiScore)} · relleno medido ${g}`;
+    }else{
+      // Pocos segundos de trabajo no pueden sacar la nota más alta
+      const cap=Math.min(10,effortCap()+1);
+      if(aiScore>cap){score=cap;how=`IA ${Math.round(aiScore)} · tope por esfuerzo ${cap}`}
+    }
+  }
   if(!scribble&&score!=null&&score<4&&(gameMode==='creative'||gameMode==='anim')&&inkOf()>=.15)score=4;
   if(scribble){
     showGrade(0,'¡Eso parece un garabato!',(byAI&&comment?comment.replace(/[\s.]*$/,'.')+' ':'')+'Los garabatos no ganan monedas. Pinta con cuidado para ganar.',0);
     if(gameMode==='friends')$('grade').scrollIntoView({block:'nearest',behavior:'smooth'});return;
   }
   if(!byAI){score=localGrade(kind);comment=skipped?'Calificado por el juego.':'La IA no estuvo disponible, así que el juego lo calificó solo.'}
-  showGrade(Math.max(1,score),byAI?'La IA dice:':'Calificación del juego',comment+(extraNote?' '+extraNote:''));
+  showGrade(Math.max(1,Math.min(10,score)),byAI?'La IA dice:':'Calificación del juego',comment+(extraNote?' '+extraNote:'')+(how?` (${how})`:''));
   if(gameMode==='friends')$('grade').scrollIntoView({block:'nearest',behavior:'smooth'});
 }
 
@@ -1834,19 +1857,38 @@ const MULT={c:1,3:1,4:1,6:2,9:3};
 // El multiplicador por dificultad solo aplica en el rompecabezas
 const multNow=()=>gameMode==='puzzle'?(MULT[CFG.diff]||1):gameMode==='nocolor'?2:1;
 const multLabel=()=>gameMode==='nocolor'?'el modo sin color':DIFF[CFG.diff];
-function gradePainting(){
-  let data;try{data=pctx.getImageData(0,0,W*2,H*2).data}catch(_){return 5}
-  const origRgb=regions.map(r=>hexRgb(r.orig));
-  let sum=0,cnt=0;
-  for(let y=2;y<H;y+=4)for(let x=2;x<W;x+=4){
-    const k=((y*2)*W*2+(x*2))*4;
-    if(lineData&&lineData[k+3]>100)continue;
+// Mide cada parte del dibujo: cuánto se pintó y qué tan parecido es su color al original
+function regionStats(){
+  if(!regions.length)return null;
+  let d;try{d=pctx.getImageData(0,0,paintCv.width,paintCv.height).data}catch(_){return null}
+  const by=new Map();
+  for(let y=3;y<H;y+=6)for(let x=3;x<W;x+=6){
     let o=-1;for(let i=regions.length-1;i>=0;i--){if(hit.isPointInPath(regions[i].path,x,y)){o=i;break}}
     if(o<0)continue;
-    const R=origRgb[o],d=Math.hypot(data[k]-R[0],data[k+1]-R[1],data[k+2]-R[2]);
-    sum+=Math.max(0,1-d/230);cnt++;
+    const k=((y*2)*W*2+(x*2))*4;if(lineData&&lineData[k+3]>100)continue;
+    const r=regions[o];let st=by.get(r.name);
+    if(!st){st={name:r.name,orig:r.orig,n:0,ink:0,match:0};by.set(r.name,st)}
+    const R=hexRgb(r.orig),dd=Math.hypot(d[k]-R[0],d[k+1]-R[1],d[k+2]-R[2]);
+    st.n++;if(d[k]+d[k+1]+d[k+2]<744)st.ink++;st.match+=Math.max(0,1-dd/230);
   }
-  return Math.max(1,Math.min(10,Math.round(cnt?sum/cnt*10:1)));
+  const list=[...by.values()].filter(st=>st.n>=2);
+  // Una parte sin pintar no cuenta como parecida (salvo las que son blancas en el original)
+  list.forEach(st=>{st.cov=st.ink/st.n;st.white=hexRgb(st.orig).reduce((a,b)=>a+b,0)>=735;st.acc=!st.white&&st.cov<.3?0:st.match/st.n});
+  return list;
+}
+// Las partes chicas cuentan casi igual que el cielo: mitad por área, mitad por parte
+function gradePainting(rs){
+  rs=rs||regionStats();if(!rs||!rs.length)return 5;
+  const tot=rs.reduce((a,st)=>a+st.n,0),byArea=rs.reduce((a,st)=>a+st.match,0)/tot,byPart=rs.reduce((a,st)=>a+st.acc,0)/rs.length;
+  return Math.max(1,Math.min(10,Math.round((byArea*.5+byPart*.5)*10)));
+}
+function statsText(kind,rs){
+  if(!rs||!rs.length)return '';
+  const missing=rs.filter(st=>!st.white&&st.cov<.3).map(st=>st.name),near=rs.filter(st=>st.acc>=.72).length;
+  let t=` Partes del dibujo y su color original: ${rs.map(st=>`${st.name} (${nameOf(st.orig).toLowerCase()})`).join(', ')}.`;
+  t+=missing.length?` Partes que quedaron casi sin pintar: ${missing.join(', ')}.`:' Todas las partes tienen pintura.';
+  if(kind==='puzzle'||kind==='nocolor')t+=` El juego midió que ${near} de ${rs.length} partes tienen un color parecido al original.`;
+  return t;
 }
 function showGrade(g,headline,note,fixedPay){
   // Los dibujos sencillos ganan poco y los mejores ganan mucho más
